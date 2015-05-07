@@ -1,7 +1,9 @@
-#!/usr/bin/env lsc
 taps = require \./index.ls
+from-s = require \from
+through = require \through
 
-taps!
-  ..push expected : "one" test : (cb) -> cb null, "ok"
-  ..on \data -> console.log it
-  ..on \end -> console.log "done"
+from-s [
+  * expected : "one" test : (cb) -> cb null, "ok"
+]
+console.log taps!
+from-s .pipe taps! .pipe through -> console.log it
