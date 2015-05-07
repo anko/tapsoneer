@@ -27,19 +27,25 @@ module.exports = construct = (opts) ->
 
   in-stream
     .on \data (obj) ->
+      console.log "plan" obj
       id = output-plan obj.expected
+      console.log "calling" obj
       obj.test (failure-message, success-message) ->
+        console.log("Got" id);
         got-result-for[id] := true
         if failure-message
         then output-result id, false, failure-message
         else output-result id, true,  success-message
 
         if input-is-over and have-all-results!
+          console.log "have all"
           out-stream.push null
 
     .on \end ->
 
-      if have-all-results! then out-stream.push null
+      if have-all-results!
+        console.log "end so bye"
+        out-stream.push null
       else # let a test callback handle it
         input-is-over := true
 
