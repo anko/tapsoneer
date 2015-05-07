@@ -1,9 +1,7 @@
 taps = require \./index.ls
-from-s = require \from
 through = require \through
 
-from-s [
-  * expected : "one" test : (cb) -> cb null, "ok"
-]
-console.log taps!
-from-s .pipe taps! .pipe through -> console.log it
+t = taps!
+t.write expected : "one" test : (cb) -> cb null, "all fine"
+t.end!
+t.pipe through -> console.log JSON.stringify it

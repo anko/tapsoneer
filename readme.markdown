@@ -1,6 +1,6 @@
 # tapson
 
-Streaming asynchronous test harness.  Optionally outputs tapson.
+Streaming asynchronous test harness.  Outputs tapson objects.
 
 ## Tutorial
 
