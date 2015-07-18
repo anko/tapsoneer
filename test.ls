@@ -3,6 +3,9 @@ test = require \tape
 require! \highland
 { unique } = require \prelude-ls
 
+# Decided to use tape for the tests because testing a
+# test framework with itself would be madness! :)
+
 test "ok then" (t) ->
 
   s = taps!
