@@ -1,7 +1,7 @@
 {
   "name": "tapson",
   "version": "0.1.0",
-  "description": "Asynchronous, streaming test harness",
+  "description": "Asynchronous, streaming tests, emitting tapson",
   "main": "index.js",
   "scripts": {
     "test": "lsc test.ls"
