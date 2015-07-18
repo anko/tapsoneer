@@ -3,8 +3,19 @@ _ = require \highland
 
 module.exports = construct = (opts) ->
 
+  # The gist here is that highland usually only exposes *transform* streams,
+  # which don't have the full generality of *duplex* streams, and we really
+  # need that generality.
+
+  # So, we're going to create 2 transform streams:
+
+  # The first is just an output sink.
+
   s-out = _!
 
+  # The second takes input and asynchronously writes into the output sink
+
+  # when it has something to say.
   s-in = _!tap ->
     id = uuid!
     { expected, test } = it
@@ -17,15 +28,19 @@ module.exports = construct = (opts) ->
       else
         s-out.write { id, +ok, actual : result }
 
-  s-in.resume!
+  s-in.resume! # Drain input stream
 
-  proc-func = (err, x, push, next) !->
-    if err then s-in.write err
-    else s-in.write x
-    next!
+  # Then we do this trick to combine the 2 streams into a duplex stream:
 
-  stream = _.pipeline do
-    (in-stream) ->
-      in-stream.consume proc-func .resume!
+  # Highland.pipeline creates an initial source stream and calls all of its
+  # arguments sequentially with the preceding stream as an argument.  It then
+  # creates a duplex stream (yey) such that the input is connected to the
+  # source it created and the output to the return value of the last one.
 
-      s-out
+  return _.pipeline (source-stream) ->
+
+    # This means we can just pipe the source into our consumer ...
+    source-stream.pipe s-in
+
+    # ... and return our producer
+    s-out
