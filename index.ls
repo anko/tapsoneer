@@ -25,9 +25,8 @@ module.exports = construct = (opts) ->
     # Asynchronously call the test function and write its result
     test.call null (err, result) ->
       if err
-        s-out.write { id, -ok, actual : (err.message || err) }
-      else
-        s-out.write { id, +ok, actual : result }
+      then s-out.write { id, ok : no  actual : (err.message || err) }
+      else s-out.write { id, ok : yes actual : result }
 
   s-in.resume! # Drain input stream
 
