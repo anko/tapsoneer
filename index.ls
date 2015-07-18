@@ -1,5 +1,4 @@
-uuid = require \uuid .v4
-_ = require \highland
+require! <[ uuid highland ]>
 
 module.exports = construct = (opts) ->
 
@@ -11,14 +10,14 @@ module.exports = construct = (opts) ->
 
   # The first is just an output sink.
 
-  s-out = _!
+  s-out = highland!
 
   # The second takes input and asynchronously writes into the output sink
 
   # when it has something to say.
-  s-in = _!tap ->
+  s-in = highland!tap ({ expected, test }) ->
+
     id = uuid!
-    { expected, test } = it
 
     s-out.write { id, expected }
 
@@ -37,7 +36,7 @@ module.exports = construct = (opts) ->
   # creates a duplex stream (yey) such that the input is connected to the
   # source it created and the output to the return value of the last one.
 
-  return _.pipeline (source-stream) ->
+  return highland.pipeline (source-stream) ->
 
     # This means we can just pipe the source into our consumer ...
     source-stream.pipe s-in
