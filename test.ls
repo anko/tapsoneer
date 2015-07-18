@@ -4,7 +4,7 @@ through = require \through
 s = taps!
 
 [ 0 to 4 ].for-each (n) ->
-  r = Math.random! * 2000
+  r = Math.random! * 500
   s.write {
     expected : "test number #n"
     test : (cb) ->
