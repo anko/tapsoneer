@@ -1,16 +1,17 @@
 taps = require \./index.ls
 through = require \through
 
-{ input, output } = taps!
+s = taps!
 
 [ 0 to 4 ].for-each (n) ->
-  input.write {
+  r = Math.random! * 2000
+  s.write {
     expected : "test number #n"
     test : (cb) ->
       set-timeout do
-        -> cb null, "all fine for #n"
-        1000
+        -> cb null, "all fine for #n (#r)"
+        r
   }
-input.end!
+s.end!
 
-output.pipe through -> console.log "+", JSON.stringify it
+s.pipe through -> console.log "+", JSON.stringify it

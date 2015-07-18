@@ -1,8 +1,4 @@
-uuid    = require \uuid .v4
-through = require \through
-duplexer = require \duplexer2
-es  = require \event-stream
-{ values, all, id } = require \prelude-ls
+uuid = require \uuid .v4
 _ = require \highland
 
 module.exports = construct = (opts) ->
@@ -30,5 +26,15 @@ module.exports = construct = (opts) ->
 
   result-stream.resume!
 
-  input : s-in
-  output : s-out
+  proc-func = (err, x, push, next) !->
+    if err
+      s-in.write err
+    else
+      s-in.write x
+    next!
+
+  stream = _.pipeline do
+    (in-stream) ->
+      in-stream.consume proc-func .resume!
+
+      s-out
