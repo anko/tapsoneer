@@ -19,8 +19,10 @@ module.exports = construct = (opts) ->
 
     id = uuid!
 
+    # Write the test plan
     s-out.write { id, expected }
 
+    # Asynchronously call the test function and write its result
     test.call null (err, result) ->
       if err
         s-out.write { id, -ok, actual : (err.message || err) }
