@@ -4,7 +4,8 @@
   "description": "Asynchronous, streaming tests, emitting tapson",
   "main": "index.js",
   "scripts": {
-    "test": "lsc test.ls"
+    "test": "lsc test.ls",
+    "prepublish": "lsc -c index.ls"
   },
   "author": "Anko <an@cyan.io> (http://an.cyan.io)",
   "license": "ISC",
