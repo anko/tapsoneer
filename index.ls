@@ -9,12 +9,14 @@ module.exports = construct = (opts) ->
   # So, we're going to create 2 transform streams:
 
   # The first is just an output sink.
-
   s-out = highland!
 
-  # The second takes input and asynchronously writes into the output sink
+  total-planned  = 0
+  total-finished = 0
+  input-done = false
 
-  # when it has something to say.
+  # The second takes input and asynchronously writes into the output sink when
+  # it has something to say.
   s-in = highland!tap ({ expected, test }) ->
 
     id = uuid!
@@ -22,11 +24,21 @@ module.exports = construct = (opts) ->
     # Write the test plan
     s-out.write { id, expected }
 
+    ++total-planned
+
     # Asynchronously call the test function and write its result
     test.call null (err, result) ->
+      ++total-finished
       if err
       then s-out.write { id, ok : no  actual : (err.message || err) }
       else s-out.write { id, ok : yes actual : result }
+      if input-done and (total-planned == total-finished)
+        s-out.write highland.nil
+
+  s-in.on \end ->
+    if total-planned is total-finished
+      s-out.write highland.nil
+    else input-done := true
 
   s-in.resume! # Drain input stream
 
