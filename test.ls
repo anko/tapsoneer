@@ -38,3 +38,32 @@ test "simple 5-successes in random order" (t) ->
       t.ok do
         "all fine for #n" in d.map (.actual)
         "test result #n exists"
+
+test "1-success, 1 failure" (t) ->
+
+  s = taps!
+
+  t.plan 4
+
+  s.write {
+    expected : "succeeding test"
+    test : (cb) ->
+      cb null, "all fine"
+  }
+  s.write {
+    expected : "failing test"
+    test : (cb) ->
+      cb "not ok"
+  }
+  s.end!
+
+  highland s .to-array (d) ->
+    d.length `t.equals` 4
+    d.filter (.ok?)
+      ..length `t.equals` 2
+      ..filter (.ok == true) .length
+        .. `t.equals` 1
+      ..filter (.ok == false) .length
+        .. `t.equals` 1
+
+    t.end!
