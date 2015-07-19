@@ -4,12 +4,12 @@ module.exports = construct = (options={}) ->
 
   { object-mode } = options
 
-  # This is our output sink.
+  # This is the output stream
   s-out = highland!
 
   total-planned  = 0
   total-finished = 0
-  input-done = false
+  input-done     = false
 
   # This is called by the user when they won't be planning any more tests.
   done = ->
@@ -20,8 +20,7 @@ module.exports = construct = (options={}) ->
     # Otherwise just remember that it's safe to quit once all the planned tests
     # are complete.  (It's the test result callbacks' responsibility to quit
     # once all the tests are complete.)
-    else
-      input-done := true
+    else input-done := true
 
   # This is called by the user when they want to plan a test.  It returns a
   # function they can call to run that test immediately.
