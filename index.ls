@@ -1,6 +1,8 @@
 require! <[ uuid highland ]>
 
-module.exports = construct = (opts) ->
+module.exports = construct = (options={}) ->
+
+  { object-mode } = options
 
   # This is our output sink.
   s-out = highland!
@@ -42,8 +44,9 @@ module.exports = construct = (opts) ->
 
     id = uuid!
 
-    # Write the test plan object
-    s-out.write { id, expected }
+    # Write the test plan
+    v = { id, expected }
+    s-out.write if object-mode then v else JSON.stringify v
 
     # Give the user back a function that they can call to run the test
     # immediately.  It optionally takes a callback function, in case they want

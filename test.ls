@@ -8,7 +8,7 @@ require! \async
 
 test "plan 2, run sequentially" (t) ->
 
-  tests = taps!
+  tests = taps { +object-mode }
 
   test1 = tests.plan "runs first" (cb) ->
     set-timeout do

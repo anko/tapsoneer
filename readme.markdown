@@ -4,8 +4,7 @@ A simple Node.js/io.js interface to the tapson test protocol.
 
 Tests are planned, then run asynchronously with whatever dependencies you like.
 
-Exports a readable stream that outputs objects corresponding to the appropriate
-tapson protocol stream.
+Exports a readable tapson protocol stream.
 
 ## Tutorial
 
@@ -43,9 +42,12 @@ looks like—
 
 ## Exported things
 
-### `var tests = tapson()`
+### `var tests = tapson([options])`
 
 Creates a new tapson test set, ready and waiting for tests.
+
+By default, the emitted stream outputs Node Buffers.  If you want a stream of
+objects instead, pass an options object with `{ objectMode : true }`.
 
 ### `var test = tests.plan([description], testFunction)`
 
@@ -67,5 +69,9 @@ tests.plan("this works", function(cb) { cb() })();
 
 ### `tests.out`
 
-This is a Node tapson stream.  Each test plan and test result is logged.
-Finishes when all the tests finish.
+This is a [stream][1] containing tapson.  All test plans and test results are
+emitted from it as they happen.  The stream finishes when all the tests finish.
+
+If you want it on `stdout`, just do `tests.out.pipe(process.stdout)`.
+
+[1]: http://nodejs.org/api/stream.html
