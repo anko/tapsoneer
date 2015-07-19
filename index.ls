@@ -56,3 +56,6 @@ module.exports = construct = (opts) ->
 
     # ... and return our producer
     s-out
+
+    # .. since our consumer (s-in) handles putting the appropriate stuff into
+    # the output stream (s-out).
