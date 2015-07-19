@@ -96,13 +96,44 @@ tests:
 tests.plan("this runs right away", function(cb) { cb(null, "no problemo") })();
 ```
 
+If you want to pass data between tests (some stuff from a database, say), just
+call your test function's result callback with that data as additional
+arguments.  They'll be prepended to the test callback's arguments in a way
+that's compatible with [`async.waterfall`][3]:
+
+```js
+var queryDatabase = tests.plan("database opens", function(cb) {
+    db.query("some-query", function(e, data) {
+        if (e) {
+            cb(e); // fail
+        }
+        else {
+            cb(null, "database ok", data);
+        }
+    });
+});
+
+var checkData = tests.plan("data looks fine", function(data, cb) {
+    if (data == "correct value") {
+        cb(null, "yep");
+    } else {
+        cb("Got bad data: " + data); // fail
+    }
+}
+
+tests.done();
+
+async.waterfall([ queryDatabase, checkData ]);
+```
+
 ### `tests.out`
 
-This is a [stream][3] containing tapson.  All test plans and test results are
+This is a [stream][4] containing tapson.  All test plans and test results are
 emitted from it as they happen.  The stream finishes when all the tests finish.
 
 If you want it on `stdout`, just do `tests.out.pipe(process.stdout)`.
 
 [1]: https://github.com/caolan/async
 [2]: https://github.com/caolan/async#auto
-[3]: http://nodejs.org/api/stream.html
+[3]: https://github.com/caolan/async#waterfalltasks-callback
+[4]: http://nodejs.org/api/stream.html

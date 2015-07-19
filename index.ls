@@ -50,9 +50,9 @@ module.exports = construct = (options={}) ->
     # Give the user back a function that they can call to run the test
     # immediately.  It optionally takes a callback function, in case they want
     # to do some custom test sequencing.
-    return (maybe-callback) !->
-      # Asynchronously call the test function and write its result
-      test-func.call null (err, result) ->
+    return (...other-args, maybe-callback) !->
+
+      test-func-callback = (err, result, additional-data) ->
         ++total-finished
         if err
         then s-out.write { id, ok : no  actual : (err.message || err) }
@@ -60,7 +60,15 @@ module.exports = construct = (options={}) ->
         if input-done and (total-planned == total-finished)
           s-out.write highland.nil
 
-        if maybe-callback then maybe-callback err, result
+        if maybe-callback
+          maybe-callback.apply do
+            null
+            [ err ] ++ Array::slice.call arguments, 2
+
+      # Asynchronously call the test function and write its result
+      test-func-args = other-args
+        ..push test-func-callback
+      test-func.apply null test-func-args
 
   out  : s-out
   plan : plan

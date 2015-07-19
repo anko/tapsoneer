@@ -43,3 +43,41 @@ test "plan 2, run sequentially" (t) ->
         ..actual `t.is` "second here"
 
   t.end!
+
+test "plan 2, pass data" (t) ->
+
+  tests = taps { +object-mode }
+
+  test1 = tests.plan "runs first" (cb) ->
+    set-timeout do
+      -> cb null "first here" "ADDITIONAL DATA!"
+      200
+  test2 = tests.plan "runs second" (data, cb) ->
+    set-timeout do
+      -> cb null "second here with #data"
+      100
+  tests.done!
+
+  <- async.waterfall [
+    * (cb) -> test1 cb
+    * (res, cb) -> test2 res, cb
+  ]
+
+  highland tests.out .to-array ->
+    it
+      ..length `t.equals` 4
+      ..for-each (d, i) -> t.ok d.id, "output object #i has id"
+      ..0
+        ..ok `t.is` undefined
+        ..expected `t.is` "runs first"
+      ..1
+        ..ok `t.is` undefined
+        ..expected `t.is` "runs second"
+      ..2
+        ..ok `t.is` true
+        ..actual `t.is` "first here"
+      ..3
+        ..ok `t.is` true
+        ..actual `t.is` "second here with ADDITIONAL DATA!"
+
+  t.end!
