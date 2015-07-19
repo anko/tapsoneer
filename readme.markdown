@@ -60,18 +60,49 @@ a failure, pass an `Error` object or `String` error message as the first
 parameter.  If it succeeded, pass `null` as the first parameter and an optional
 String describing the success as the second.
 
-If you want to run the test immediately after you plan it, it's totally OK to
-just immediately call the return value:
+### `test([callback])`
+
+Runs the given test immediately.  Its results will be on the output stream as
+soon as the test completes.
+
+You can optionally pass it a `callback` argument, to be notified when the test
+finishes.  This is handy if some of your tests depend on other tests, and means
+you can use [async.js][1] to do stuff like—
 
 ```js
-tests.plan("this works", function(cb) { cb() })();
+
+var databaseConnection = null;
+
+var testSetupDatabase = tests.plan("database sets up", function(cb) {
+    // Do whatever you need to set up the database, and call `cb`.
+});
+var testQuery = tests.plan("query some values", function(cb) {
+    // Use the `databaseConnection` to do stuff and call `cb`.
+});
+
+tests.done();
+
+async.series([ testSetupDatabase, testQuery ]);
+```
+
+—to ensure they run sequentially.  If you have a tangly mess of dependencies,
+[`async.auto`][2] is your friend.
+
+If you want to run a test immediately after you plan it because it has no
+dependencies on anything, that's fine too.  It'll run in parallel with other
+tests:
+
+```js
+tests.plan("this runs right away", function(cb) { cb(null, "no problemo") })();
 ```
 
 ### `tests.out`
 
-This is a [stream][1] containing tapson.  All test plans and test results are
+This is a [stream][3] containing tapson.  All test plans and test results are
 emitted from it as they happen.  The stream finishes when all the tests finish.
 
 If you want it on `stdout`, just do `tests.out.pipe(process.stdout)`.
 
-[1]: http://nodejs.org/api/stream.html
+[1]: https://github.com/caolan/async
+[2]: https://github.com/caolan/async#auto
+[3]: http://nodejs.org/api/stream.html
