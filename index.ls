@@ -2,60 +2,64 @@ require! <[ uuid highland ]>
 
 module.exports = construct = (opts) ->
 
-  # The gist here is that highland usually only exposes *transform* streams,
-  # which don't have the full generality of *duplex* streams, and we really
-  # need that generality.
-
-  # So, we're going to create 2 transform streams:
-
-  # The first is just an output sink.
+  # This is our output sink.
   s-out = highland!
 
   total-planned  = 0
   total-finished = 0
   input-done = false
 
-  # The second takes input and asynchronously writes into the output sink when
-  # it has something to say.
-  s-in = highland!tap ({ expected, test }) ->
+  # This is called by the user when they won't be planning any more tests.
+  done = ->
+    # If we're done with all the tests, end the output stream now.
+    if total-planned is total-finished
+      s-out.write highland.nil # end output
 
-    id = uuid!
+    # Otherwise just remember that it's safe to quit once all the planned tests
+    # are complete.  (It's the test result callbacks' responsibility to quit
+    # once all the tests are complete.)
+    else
+      input-done := true
 
-    # Write the test plan
-    s-out.write { id, expected }
+  # This is called by the user when they want to plan a test.  It returns a
+  # function they can call to run that test immediately.
+  plan = (string-or-func, test-func) ->
+
+    # Handle that funky first argument
+    var expected
+    if typeof string-or-func is \string
+      expected := string-or-func
+    else
+      test-func := string-or-func
+
+    # Check sanity
+    if typeof test-func isnt \function
+      throw Error "Test function wasn't a function"
+    if typeof expected isnt \string
+      throw Error "Test expectation-description wasn't a string"
 
     ++total-planned
 
-    # Asynchronously call the test function and write its result
-    test.call null (err, result) ->
-      ++total-finished
-      if err
-      then s-out.write { id, ok : no  actual : (err.message || err) }
-      else s-out.write { id, ok : yes actual : result }
-      if input-done and (total-planned == total-finished)
-        s-out.write highland.nil
+    id = uuid!
 
-  s-in.on \end ->
-    if total-planned is total-finished
-      s-out.write highland.nil
-    else input-done := true
+    # Write the test plan object
+    s-out.write { id, expected }
 
-  s-in.resume! # Drain input stream
+    # Give the user back a function that they can call to run the test
+    # immediately.  It optionally takes a callback function, in case they want
+    # to do some custom test sequencing.
+    return (maybe-callback) !->
+      # Asynchronously call the test function and write its result
+      test-func.call null (err, result) ->
+        ++total-finished
+        if err
+        then s-out.write { id, ok : no  actual : (err.message || err) }
+        else s-out.write { id, ok : yes actual : result }
+        if input-done and (total-planned == total-finished)
+          s-out.write highland.nil
 
-  # Then we do this trick to combine the 2 streams into a duplex stream:
+        if maybe-callback then maybe-callback err, result
 
-  # Highland.pipeline creates an initial source stream and calls all of its
-  # arguments sequentially with the preceding stream as an argument.  It then
-  # creates a duplex stream (yey) such that the input is connected to the
-  # source it created and the output to the return value of the last one.
-
-  return highland.pipeline (source-stream) ->
-
-    # This means we can just pipe the source into our consumer ...
-    source-stream.pipe s-in
-
-    # ... and return our producer
-    s-out
-
-    # .. since our consumer (s-in) handles putting the appropriate stuff into
-    # the output stream (s-out).
+  out  : s-out
+  plan : plan
+  done : done

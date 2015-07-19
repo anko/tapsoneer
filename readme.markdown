@@ -2,78 +2,70 @@
 
 A simple Node.js/io.js interface to the tapson test protocol.
 
-Tests are run immediately as they're received and their outputs emitted
-immediately as they finish.
+Tests are planned, then run asynchronously with whatever dependencies you like.
 
-Exports a duplex stream, which takes test specifications as objects with
-`expected`-text and an async `test` function, and outputs objects exactly
-corresponding to the appropriate tapson protocol stream.
+Exports a readable stream that outputs objects corresponding to the appropriate
+tapson protocol stream.
 
 ## Tutorial
 
 ```js
-// Instantiate.
+// Instantiate
 var taps = require("tapson")();
 
-// Push test objects.
-[ 0, 1, 2, 3, 4 ].forEach(function(n) {
-    taps.write({
-        expected : "Test number " + n, // A description of the test
-        test : function(callback) {
-
-            // Test logic goes here.
-
-            // For illustration, just succeed 0 - 1 seconds later.
-            setTimeout(function() {
-                callback(null, "Success " + n);
-            }, Math.random() * 1000);
-        }
-    });
+// Create 2 tests that finish in 0 - 1 seconds
+var test1 = taps.plan("this runs first", function(cb) {
+    setTimeout(function() { cb(null, "first ok") }, Math.random() * 1000);
 });
+var test2 = taps.plan("this runs second", function(cb) {
+    setTimeout(function() { cb(null, "second ok") }, Math.random() * 1000);
+});
+// Tell tapson we're done with planning tests
+taps.done();
 
-// End input stream.
-taps.end();
+// Run the tests in parallel
+test1();
+test2();
 
-// Tests are run immediately as you write them to the stream.
-// A tapson test plan object is emitted for each.
-// Once the result comes back, that's emitted also.
-
-// At this point you can just pipe the output data wherever you want it.
-
-// The output data stream ends when all tests have finished.
-
-taps.on("data", function(d) { console.log(d); });
+// Read the output data stream
+taps.out.on("data", function(d) { console.log(d); });
 ```
 
-With the above, you can expect output like—
+With the above, tapson runs both tests in parallel.  You can expect output that
+looks like—
 
 ```json
-{"id":"5a10fa17-1783-4b72-afa5-5cab41209dae","expected":"Test number 0"}
-{"id":"68cb2ae4-f769-4f86-82d9-a15fdab4180a","expected":"Test number 1"}
-{"id":"4b157358-603f-49c3-aec5-a0498ff89447","expected":"Test number 2"}
-{"id":"65d345fd-1295-4aad-be70-1ac4333d7f43","expected":"Test number 3"}
-{"id":"4f4ac792-f37f-4dc3-a97d-5004e05ca669","expected":"Test number 4"}
-{"id":"4b157358-603f-49c3-aec5-a0498ff89447","ok":true,"actual":"Success 2"}
-{"id":"4f4ac792-f37f-4dc3-a97d-5004e05ca669","ok":true,"actual":"Success 4"}
-{"id":"68cb2ae4-f769-4f86-82d9-a15fdab4180a","ok":true,"actual":"Success 1"}
-{"id":"5a10fa17-1783-4b72-afa5-5cab41209dae","ok":true,"actual":"Success 0"}
-{"id":"65d345fd-1295-4aad-be70-1ac4333d7f43","ok":true,"actual":"Success 3"}
+{"id":"5a10fa17-1783-4b72-afa5-5cab41209dae","expected":"this runs first"}
+{"id":"68cb2ae4-f769-4f86-82d9-a15fdab4180a","expected":"this runs second"}
+{"id":"4f4ac792-f37f-4dc3-a97d-5004e05ca669","ok":true,"actual":"second ok"}
+{"id":"4b157358-603f-49c3-aec5-a0498ff89447","ok":true,"actual":"first ok"}
 ```
 
-## methods
+## Exported things
 
-### `tapson()`
+### `var tests = tapson()`
 
-Creates a new duplex tapson stream.
+Creates a new tapson test set, ready and waiting for tests.
 
-### `tapson-stream.write(obj)`
+### `var test = tests.plan([description], testFunction)`
 
-Expects `obj` to have an `expected` String value that tells a human what the
-test should do, and a `test` Function value that tells it how to carry out the
-test.
+Plans a new test with an optional description and a function that runs it.
+Returns a function that you can call to immediately run the test.
 
 The `test` will be passed a callback function as its only argument, which it
-should call once it is finished.  If the test failed, pass an `Error` object or
-`String` error message as the first parameter.  If it succeeded, pass `null` as
-the first parameter and an optional String describing the success as the
-second.
+should call once it is finished.  As is the usual Node.js practice, if there's
+a failure, pass an `Error` object or `String` error message as the first
+parameter.  If it succeeded, pass `null` as the first parameter and an optional
+String describing the success as the second.
+
+If you want to run the test immediately after you plan it, it's totally OK to
+just immediately call the return value:
+
+```js
+tests.plan("this works", function(cb) { cb() })();
+```
+
+### `tests.out`
+
+This is a Node tapson stream.  Each test plan and test result is logged.
+Finishes when all the tests finish.
