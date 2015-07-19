@@ -6,7 +6,7 @@ require! \highland
 # Decided to use tape for the tests because testing a
 # test framework with itself would be madness! :)
 
-test "ok then" (t) ->
+test "simple 5-successes in random order" (t) ->
 
   s = taps!
 
