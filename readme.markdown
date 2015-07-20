@@ -133,7 +133,12 @@ emitted from it as they happen.  The stream finishes when all the tests finish.
 
 If you want it on `stdout`, just do `tests.out.pipe(process.stdout)`.
 
+## License
+
+[ISC][5].
+
 [1]: https://github.com/caolan/async
 [2]: https://github.com/caolan/async#auto
 [3]: https://github.com/caolan/async#waterfalltasks-callback
 [4]: http://nodejs.org/api/stream.html
+[5]: LICENSE
