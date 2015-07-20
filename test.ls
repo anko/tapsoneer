@@ -81,3 +81,37 @@ test "plan 2, pass data" (t) ->
         ..actual `t.is` "second here with ADDITIONAL DATA!"
 
   t.end!
+
+test "plan 1, fail 1" (t) ->
+  tests = taps { +object-mode }
+
+  t1 = tests.plan "succeeds" (cb) ->
+    set-timeout do
+      -> cb null "ok"
+      200
+  t2 = tests.plan "fails" (cb) ->
+    set-timeout do
+      -> cb (new Error "fail")
+      100
+  tests.done!
+
+  async.series [ t1, t2 ]
+
+  highland tests.out .to-array ->
+    it
+      ..length `t.equals` 4
+      ..for-each (d, i) -> t.ok d.id, "output object #i has id"
+      ..0
+        ..ok `t.is` undefined
+        ..expected `t.is` "succeeds"
+      ..1
+        ..ok `t.is` undefined
+        ..expected `t.is` "fails"
+      ..2
+        ..ok `t.is` true
+        ..actual `t.is` "ok"
+      ..3
+        ..ok `t.is` false
+        ..actual `t.is` "fail"
+
+  t.end!
