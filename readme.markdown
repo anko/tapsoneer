@@ -1,4 +1,4 @@
-# tapson
+# tapsoneer
 
 A simple Node.js/io.js interface to the tapson test protocol.
 
@@ -10,7 +10,7 @@ Exports a readable tapson protocol stream.
 
 ```js
 // Instantiate
-var taps = require("tapson")();
+var taps = require("tapsoneer")();
 
 // Create 2 tests that finish in 0 - 1 seconds
 var test1 = taps.plan("this runs first", function(cb) {
@@ -19,7 +19,7 @@ var test1 = taps.plan("this runs first", function(cb) {
 var test2 = taps.plan("this runs second", function(cb) {
     setTimeout(function() { cb(null, "second ok") }, Math.random() * 1000);
 });
-// Tell tapson we're done with planning tests
+// Tell tapsoneer we're done with planning tests
 taps.done();
 
 // Run the tests in parallel
@@ -30,7 +30,7 @@ test2();
 taps.out.on("data", function(d) { console.log(d); });
 ```
 
-With the above, tapson runs both tests in parallel.  You can expect output that
+With the above, tapsoneer runs both tests in parallel.  You can expect output that
 looks like—
 
 ```json
@@ -42,9 +42,9 @@ looks like—
 
 ## Exported things
 
-### `var tests = tapson([options])`
+### `var tests = tapsoneer([options])`
 
-Creates a new tapson test set, ready and waiting for tests.
+Creates a new tapsoneer test set, ready and waiting for tests.
 
 By default, the emitted stream outputs Node Buffers.  If you want a stream of
 objects instead, pass an options object with `{ objectMode : true }`.

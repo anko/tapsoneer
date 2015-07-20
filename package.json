@@ -1,7 +1,7 @@
 {
-  "name": "tapson",
+  "name": "tapsoneer",
   "version": "0.1.0",
-  "description": "Asynchronous, streaming tests, emitting tapson",
+  "description": "Parallel testing framework, emitting a tapson stream",
   "main": "index.js",
   "scripts": {
     "test": "lsc test.ls",
