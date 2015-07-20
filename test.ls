@@ -2,6 +2,7 @@ taps = require \./index.ls
 test = require \tape
 require! \highland
 require! \async
+require! \concat-stream
 
 # Decided to use tape for the tests because testing a
 # test framework with itself would be madness! :)
@@ -115,3 +116,29 @@ test "plan 1, fail 1" (t) ->
         ..actual `t.is` "fail"
 
   t.end!
+
+test "plan 1, fail 1, with stream in buffer mode" (t) ->
+  tests = taps!
+
+  t1 = tests.plan "succeeds" (cb) ->
+    set-timeout do
+      -> cb null "ok"
+      200
+  t2 = tests.plan "fails" (cb) ->
+    set-timeout do
+      -> cb (new Error "fail")
+      100
+  tests.done!
+
+  async.series [ t1, t2 ]
+
+  tests.out .pipe concat-stream ->
+    # Made id properties empty; we know they're there
+    it .= replace /"id":"[^"]*"/g, '"id":""'
+    t.equals it, '''
+    {"id":"","expected":"succeeds"}
+    {"id":"","expected":"fails"}
+    {"id":"","ok":true,"actual":"ok"}
+    {"id":"","ok":false,"actual":"fail"}\n'''
+
+    t.end!

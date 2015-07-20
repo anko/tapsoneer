@@ -43,9 +43,13 @@ module.exports = construct = (options={}) ->
 
     id = uuid!
 
+    write-data = (obj) ->
+      s-out.write do
+        if object-mode then obj
+        else (JSON.stringify obj) + "\n"
+
     # Write the test plan
-    v = { id, expected }
-    s-out.write if object-mode then v else JSON.stringify v
+    write-data { id, expected }
 
     # Give the user back a function that they can call to run the test
     # immediately.  It optionally takes a callback function, in case they want
@@ -55,8 +59,8 @@ module.exports = construct = (options={}) ->
       test-func-callback = (err, result, additional-data) ->
         ++total-finished
         if err
-        then s-out.write { id, ok : no  actual : (err.message || err) }
-        else s-out.write { id, ok : yes actual : result }
+        then write-data { id, ok : no  actual : (err.message || err) }
+        else write-data { id, ok : yes actual : result }
         if input-done and (total-planned == total-finished)
           s-out.write highland.nil
 
