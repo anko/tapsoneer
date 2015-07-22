@@ -2,7 +2,8 @@
 
 A simple Node.js/io.js interface to the tapson test protocol.
 
-Tests are planned, then run asynchronously with whatever dependencies you like.
+Tests are planned, then run asynchronously.  If some of your tests depend on
+each other, you can specify how.
 
 Exports a readable tapson protocol stream.
 
