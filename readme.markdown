@@ -1,6 +1,6 @@
-# tapsoneer [![](https://img.shields.io/npm/v/tapsoneer.svg?style=flat-square)][1]
+# tapsoneer [![](https://img.shields.io/npm/v/tapsoneer.svg?style=flat-square)][1] [![](https://img.shields.io/travis/anko/tapsoneer.svg?style=flat-square)][2]
 
-A simple Node.js/io.js interface to the [tapson][2] test protocol, version
+A simple Node.js/io.js interface to the [tapson][3] test protocol, version
 1.0.0.
 
 Tests are planned, then run asynchronously.  If some of your tests depend on
@@ -71,7 +71,7 @@ soon as the test completes.
 
 You can optionally pass it a `callback` argument, to be notified when the test
 finishes.  This is handy if some of your tests depend on other tests, and means
-you can use [async.js][3] to do stuff like—
+you can use [async.js][4] to do stuff like—
 
 ```js
 
@@ -90,7 +90,7 @@ async.series([ testSetupDatabase, testQuery ]);
 ```
 
 —to ensure they run sequentially.  If you have a tangly mess of dependencies,
-[`async.auto`][4] is your friend.
+[`async.auto`][5] is your friend.
 
 If you want to run a test immediately after you plan it because it has no
 dependencies on anything, that's fine too.  It'll run in parallel with other
@@ -103,7 +103,7 @@ tests.plan("this runs right away", function(cb) { cb(null, "no problemo") })();
 If you want to pass data between tests (some stuff from a database, say), just
 call your test function's result callback with that data as additional
 arguments.  They'll be prepended to the test callback's arguments in a way
-that's compatible with [`async.waterfall`][5]:
+that's compatible with [`async.waterfall`][6]:
 
 ```js
 var queryDatabase = tests.plan("database opens", function(cb) {
@@ -132,19 +132,20 @@ async.waterfall([ queryDatabase, checkData ]);
 
 ### `tests.out`
 
-This is a [stream][6] containing tapson.  All test plans and test results are
+This is a [stream][7] containing tapson.  All test plans and test results are
 emitted from it as they happen.  The stream finishes when all the tests finish.
 
 If you want it on `stdout`, just do `tests.out.pipe(process.stdout)`.
 
 ## License
 
-[ISC][7].
+[ISC][8].
 
 [1]: https://www.npmjs.com/package/tapsoneer
-[2]: https://github.com/anko/tapson
-[3]: https://github.com/caolan/async
-[4]: https://github.com/caolan/async#auto
-[5]: https://github.com/caolan/async#waterfalltasks-callback
-[6]: http://nodejs.org/api/stream.html
-[7]: LICENSE
+[2]: https://travis-ci.org/anko/tapsoneer
+[3]: https://github.com/anko/tapson
+[4]: https://github.com/caolan/async
+[5]: https://github.com/caolan/async#auto
+[6]: https://github.com/caolan/async#waterfalltasks-callback
+[7]: http://nodejs.org/api/stream.html
+[8]: LICENSE
