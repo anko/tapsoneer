@@ -1,6 +1,7 @@
 # tapsoneer
 
-A simple Node.js/io.js interface to the tapson test protocol.
+A simple Node.js/io.js interface to the [tapson][1] test protocol, version
+1.0.0.
 
 Tests are planned, then run asynchronously.  If some of your tests depend on
 each other, you can specify how.
@@ -68,7 +69,7 @@ soon as the test completes.
 
 You can optionally pass it a `callback` argument, to be notified when the test
 finishes.  This is handy if some of your tests depend on other tests, and means
-you can use [async.js][1] to do stuff like—
+you can use [async.js][2] to do stuff like—
 
 ```js
 
@@ -87,7 +88,7 @@ async.series([ testSetupDatabase, testQuery ]);
 ```
 
 —to ensure they run sequentially.  If you have a tangly mess of dependencies,
-[`async.auto`][2] is your friend.
+[`async.auto`][3] is your friend.
 
 If you want to run a test immediately after you plan it because it has no
 dependencies on anything, that's fine too.  It'll run in parallel with other
@@ -100,7 +101,7 @@ tests.plan("this runs right away", function(cb) { cb(null, "no problemo") })();
 If you want to pass data between tests (some stuff from a database, say), just
 call your test function's result callback with that data as additional
 arguments.  They'll be prepended to the test callback's arguments in a way
-that's compatible with [`async.waterfall`][3]:
+that's compatible with [`async.waterfall`][4]:
 
 ```js
 var queryDatabase = tests.plan("database opens", function(cb) {
@@ -129,17 +130,18 @@ async.waterfall([ queryDatabase, checkData ]);
 
 ### `tests.out`
 
-This is a [stream][4] containing tapson.  All test plans and test results are
+This is a [stream][5] containing tapson.  All test plans and test results are
 emitted from it as they happen.  The stream finishes when all the tests finish.
 
 If you want it on `stdout`, just do `tests.out.pipe(process.stdout)`.
 
 ## License
 
-[ISC][5].
+[ISC][6].
 
-[1]: https://github.com/caolan/async
-[2]: https://github.com/caolan/async#auto
-[3]: https://github.com/caolan/async#waterfalltasks-callback
-[4]: http://nodejs.org/api/stream.html
-[5]: LICENSE
+[1]: https://github.com/anko/tapson
+[2]: https://github.com/caolan/async
+[3]: https://github.com/caolan/async#auto
+[4]: https://github.com/caolan/async#waterfalltasks-callback
+[5]: http://nodejs.org/api/stream.html
+[6]: LICENSE
